@@ -1,0 +1,232 @@
+header {
+  text-align: center;
+
+
+  // font-family: 'Courier New', Courier, monospace;
+  // font-size: 15px;
+
+  .radar-title, .buttons-group, #alternative-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    // justify-content:  flex-end;
+    align-items: center;
+    align-content: space-between;
+  }
+
+  .radar-title {
+    padding: 30px 0;
+
+    display: table;
+    margin: auto;
+    width: 100%;
+
+    .radar-title__text {
+
+      display: table-cell;
+      width: 70%;
+
+      text-align: right;
+      padding-right: 10%;
+
+      h1 {
+        font-size: 40px;
+        font-family: Nunito, Arito, sans-serif;
+        font-weight: bold;
+        letter-spacing: -.04em;
+        line-height: 0.8em;
+        margin: 0;
+        margin-right: 10px;
+        text-transform: none;
+        color: $black;
+      }
+    }
+
+    .radar-title__logo {
+      flex: 0 0 30%;
+      margin-left: auto;
+
+      width: 30%;
+      display: table-cell;
+      vertical-align: middle;
+
+      a {
+        border-bottom: none;
+        color: $black;
+      }
+
+      img {
+        vertical-align: middle;
+        width: 34%;
+      }
+    }
+  }
+
+
+  .quadrant-btn--group, .multiple-sheet-button-group {
+    text-align: left;
+    padding-left: 10%;
+  }
+
+  .print-radar-btn, .search-box {
+    margin-left: auto;
+    margin-right: 10%;
+  }
+
+  .buttons-group {
+    padding: 15px 0 25px;
+  }
+
+  .home-link {
+    color: $black;
+    line-height: normal;
+    cursor: pointer;
+    display: inline-block;
+    font-size: $baseFont;
+    font-family: Nunito, Arito, sans-serif;
+    text-align: left;
+    width: 80%;
+  }
+
+  .button {
+    font-size: $baseFont;
+    font-family: Nunito, Arito, sans-serif;
+    text-transform: capitalize;
+    margin-right: 20px;
+    // border-radius: 2px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all .2s ease-out;
+
+    background-color: inherit;
+    color: $black;
+
+    &.no-capitalize {
+      text-transform: none;
+    }
+
+    &.print-radar {
+      background-color: $yellow;
+      border-radius: 25px;
+      font-weight: 600;
+    }
+
+    &:hover, &.selected {
+
+      &.first {
+        color: black;
+        background-color: inherit;
+        border-bottom: 2px solid $yellow
+      }
+
+      &.second {
+        color: black;
+        background-color: inherit;
+        border-bottom: 2px solid $yellow
+      }
+
+      &.third {
+        color: black;
+        background-color: inherit;
+        border-bottom: 2px solid $yellow
+      }
+
+      &.fourth {
+        color: black;
+        background-color: inherit;
+        border-bottom: 2px solid $yellow;
+      }
+
+      &.print-radar {
+        box-shadow: 0 1px 8px 0 rgba(0,0,0,.14), 0 3px 8px 0 rgba(0,0,0,.11);
+        color: black;
+        background-color: $yellow;
+      }
+    }
+
+    &.full-view {
+
+      &.first {
+        background-color: inherit;
+        //color: $blue;
+      }
+
+      &.second {
+        background-color: inherit;
+        //color: $blue;
+      }
+
+      &.third {
+        background-color: inherit;
+        //color: $blue;
+      }
+
+      &.fourth {
+        background-color: inherit;
+        //color: $blue;
+      }
+    }
+  }
+
+  #alternative-buttons {
+    margin-bottom: 50px;
+
+    .highlight {
+      border-bottom: none;
+      font-weight: bold;
+    }
+
+    p {
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+    
+    .multiple-sheet-button {
+      margin-right: 10px;
+    }
+    
+    .search-radar {
+      border-bottom: 1px solid #aaa;
+      font-family: Nunito, Arito, sans-serif;
+      background-color: inherit;
+      background-image: url("../images/search.svg");
+      background-repeat: no-repeat;
+      background-position: 5px;
+      outline: none;
+      
+      &:focus {
+        border-bottom: 1px solid $yellow;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+      }
+    }
+
+    input {
+      padding-left: 35px;
+      width: 275px;
+    }
+  }
+}
+
+.ui-autocomplete {
+  width: 275px !important;
+
+  .ui-autocomplete-quadrant {
+    font-size: 14px;
+    font-family: Nunito, Arito, sans-serif;
+    font-weight: 600;
+    padding: 5px;
+  }
+
+  .ui-menu-item {
+    white-space: normal;
+    font-size: 14px;
+    font-weight: 400;
+
+    .ui-menu-item-wrapper {
+      padding: 0 10px;
+    }
+  }
+}

@@ -1,0 +1,163 @@
+name: $(Build.SourceBranchName).$(date:yyyyMMdd)$(rev:.r)
+
+trigger:
+  branches:
+    include:
+      - trunk
+      - feature/*
+  paths:
+    exclude:
+      - 'radar.csv'
+      - 'azure-pipelines-deploy.yaml'
+
+variables:
+  nombre_aplicacion: 'NU0024001_Radar_de_Tecnologia'
+
+stages:
+  - stage: pipeline_build
+    displayName: 'Pipeline Build'
+    dependsOn: []
+    jobs:
+      - job: Build
+        pool:
+          name: Build
+          demands:
+            - Agent.OS -equals Linux
+            - npm
+            - java
+        steps:
+          - task: SonarQubePrepare@5
+            displayName: 'Prepare analysis on SonarQube'
+            inputs:
+              SonarQube: SonarQube
+              scannerMode: CLI
+              configMode: manual
+              cliProjectKey: '$(Build.Repository.Name)'
+              cliProjectName: '$(Build.Repository.Name)'
+              cliProjectVersion: '$(Build.BuildNumber)'
+              extraProperties: |
+                sonar.exclusions=node_modules/**,coverage/**,examples/**,docs/**,*.test.js,**/*.test.js,spec/**,testAceptacion/**
+                sonar.sources=src
+                sonar.sourceEncoding=UTF-8
+                sonar.javascript.file.suffixes=.js
+                sonar.branch.name=$(Build.SourceBranchName)
+                sonar.javascript.lcov.reportPaths=coverage/lcov.info
+                sonar.coverage.exclusions=test/**,*.test.js,**/*.test.js,scripts/**,spec/**,*.scss,src/graphing/radar.js,src/common.js,src/site.js,src/util/autoComplete.js,src/util/factory.js,src/util/googleAuth.js
+                sonar.tests=spec
+                sonar.language=js
+
+          - task: Npm@1
+            displayName: 'npm install'
+            inputs:
+              workingDir: .
+              verbose: false
+              customEndpoint: 'npm-bancolombia'
+
+          - task: Npm@1
+            displayName: 'npm build'
+            inputs:
+              command: custom
+              workingDir: .
+              verbose: false
+              customCommand: 'run build'
+              customEndpoint: 'npm-bancolombia'
+            continueOnError: true
+
+          - task: Npm@1
+            displayName: 'npm test'
+            inputs:
+              command: custom
+              workingDir: .
+              verbose: false
+              customCommand: 'run test'
+              customEndpoint: 'npm-bancolombia'
+            continueOnError: true
+
+          - task: SonarQubeAnalyze@5
+            displayName: 'Run Code Analysis'
+
+          - task: SonarQubePublish@5
+            displayName: 'Publish Quality Gate Result'
+            inputs:
+              pollingTimeoutSec: 600
+
+          - task: sonar-buildbreaker@8
+            displayName: 'Break build on quality gate failure'
+            inputs:
+              SonarQube: SonarQube
+
+          - task: PublishTestResults@2
+            displayName: 'Publish Test Results coverage/coverage.json '
+            inputs:
+              testResultsFiles: 'coverage/coverage.json '
+            condition: succeededOrFailed()
+
+          - task: CopyFiles@2
+            displayName: 'Copy File Docker, radar.csv and performanceTest.jmx'
+            inputs:
+              Contents: performanceTest.jmx
+              TargetFolder: '$(System.DefaultWorkingDirectory)/dist'
+
+          - task: CopyFiles@2
+            displayName: 'Copy File Package.json to E2E'
+            inputs:
+              Contents: |
+                package.json
+                cypress.json
+              TargetFolder: testE2E
+
+          - script: 'cp -R spec testE2E'
+            displayName: 'Copy spec folder'
+
+          - task: ArchiveFiles@2
+            displayName: 'Compress build'
+            inputs:
+              rootFolderOrFile: '$(System.DefaultWorkingDirectory)/dist'
+              archiveFile: '$(Build.ArtifactStagingDirectory)/build/$(Build.BuildNumber).zip'
+
+          - task: ArchiveFiles@2
+            displayName: 'Compress Acceptance Test'
+            inputs:
+              rootFolderOrFile: testAceptacion
+              archiveFile: '$(Build.ArtifactStagingDirectory)/AcceptanceTest/AcceptanceTest-$(Build.BuildNumber).zip'
+
+          - task: ArchiveFiles@2
+            displayName: 'Compress E2E'
+            inputs:
+              rootFolderOrFile: testE2E
+              archiveFile: '$(Build.ArtifactStagingDirectory)/E2E/spec-$(Build.BuildNumber).zip'
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Artifact: Acceptance Test'
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)/AcceptanceTest'
+              ArtifactName: AcceptanceTest
+            condition: and(succeeded(), eq(variables['Build.SourceBranch'],'refs/heads/trunk'))
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Artifact: E2E'
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)/E2E'
+              ArtifactName: E2E
+            condition: and(succeeded(), eq(variables['Build.SourceBranch'],'refs/heads/trunk'))
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Artifact: Artifact'
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)/build'
+              ArtifactName: Artifact
+            condition: and(succeeded(), eq(variables['Build.SourceBranch'],'refs/heads/trunk'))
+
+          - task: ArtifactoryGenericUpload@2
+            displayName: 'Artifactory Generic Upload'
+            inputs:
+              artifactoryService: Artifactory
+              fileSpec: |
+                {
+                  "files": [
+                    {
+                      "pattern": "$(Build.ArtifactStagingDirectory)/build/$(Build.BuildNumber).zip",
+                      "target": "build-$(nombre_aplicacion)/$(Build.BuildNumber)/"
+                    }
+                  ]
+                }
