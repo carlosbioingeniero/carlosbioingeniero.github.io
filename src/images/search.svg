@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
+    <title>iconografia/Brands/sistrix</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M23.9732739,22.2895323 L16.1265033,14.3358575 C17.1955457,12.8445434 17.8316258,11.0111359 17.8316258,9.03340757 C17.8316258,4.05701559 13.8387528,0.00534521158 8.93184855,0.00534521158 C4.01959911,-1.51692894e-14 0.0267260579,4.05167038 0.0267260579,9.02806236 C0.0267260579,14.0044543 4.01959911,18.0561247 8.92650334,18.0561247 C11.0538976,18.0561247 13.0048998,17.2971047 14.5389755,16.0302895 L22.3429844,23.9465479 L23.9732739,22.2895323 Z M8.92650334,15.9714922 C5.15278396,15.9714922 2.07928731,12.8552339 2.07928731,9.02806236 C2.07928731,5.20089087 5.15278396,2.08463252 8.92650334,2.08463252 C12.7002227,2.08463252 15.7737194,5.20089087 15.7737194,9.02806236 C15.7737194,12.8552339 12.7055679,15.9714922 8.92650334,15.9714922 Z" id="path-1"></path>
+    </defs>
+    <g id="iconografia/Brands/sistrix" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <mask id="mask-2" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <g id="Mask"></g>
+        <g id="colores/iconos/gris" mask="url(#mask-2)" fill="#454648">
+            <rect x="0" y="0" width="24" height="24"></rect>
+        </g>
+    </g>
+</svg>

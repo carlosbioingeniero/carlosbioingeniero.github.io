@@ -1,0 +1,137 @@
+name: $(Build.SourceBranchName).$(date:yyyyMMdd)$(rev:.r)
+
+trigger:
+  branches:
+    include:
+      - trunk
+      - feature/*
+  paths:
+    include:
+      - 'azure-pipelines-deploy.yaml'
+      - 'radar.csv'
+
+variables:
+  file_name: 'radar.csv'
+
+stages:
+  - stage: deploy_dev
+    displayName: 'Deploy Dev'
+    dependsOn: []
+    variables:
+      cloudFrontID: 'ER22DI1XFHB2I'
+      bucketS3: nu0024001-radar-tecnologia-uo-s3-dev
+    jobs:
+      - job: deploy
+        pool:
+          name: Release-cloud
+        steps:
+          - task: AWSCLI@1
+            displayName: 'AWS CLI: delete files s3'
+            inputs:
+              awsCredentials: 'bancolombia-ingenieriati-dev-app-aws'
+              regionName: 'us-east-1'
+              awsCommand: 's3'
+              awsSubCommand: 'rm '
+              awsArguments: 's3://$(buckets3)/$(file_name)'
+              failOnStandardError: false
+
+          - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
+            displayName: 'S3 Upload: upload files s3'
+            inputs:
+              awsCredentials: 'bancolombia-ingenieriati-dev-app-aws'
+              regionName: 'us-east-1'
+              bucketName: '$(buckets3)'
+              sourceFolder: '$(System.DefaultWorkingDirectory)'
+              globExpressions: '$(file_name)'
+
+          - task: AWSCLI@1
+            displayName: 'AWS CLI: cloudfront invalidation'
+            inputs:
+              awsCredentials: 'bancolombia-ingenieriati-dev-app-aws'
+              regionName: 'us-east-1'
+              awsCommand: cloudfront
+              awsSubCommand: 'create-invalidation'
+              awsArguments: '--distribution-id $(cloudFrontID) --paths /*'
+              failOnStandardError: false
+
+  - stage: deploy_qa
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+    displayName: 'Deploy QA'
+    dependsOn: [deploy_dev]
+    variables:
+      cloudFrontID: E2E57VCW2Y7CB2
+      bucketS3: nu0024001-radar-tecnologia-uo-s3-qa
+    jobs:
+      - job: deploy
+        pool:
+          name: Release-cloud
+        steps:
+          - task: AWSCLI@1
+            displayName: 'AWS CLI: delete files s3'
+            inputs:
+              awsCredentials: 'bancolombia-ingenieriati-qa-app-aws'
+              regionName: 'us-east-1'
+              awsCommand: 's3'
+              awsSubCommand: 'rm '
+              awsArguments: 's3://$(buckets3)/$(file_name)'
+              failOnStandardError: false
+
+          - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
+            displayName: 'S3 Upload: upload files s3'
+            inputs:
+              awsCredentials: 'bancolombia-ingenieriati-qa-app-aws'
+              regionName: 'us-east-1'
+              bucketName: '$(buckets3)'
+              sourceFolder: '$(System.DefaultWorkingDirectory)'
+              globExpressions: '$(file_name)'
+
+          - task: AWSCLI@1
+            displayName: 'AWS CLI: cloudfront invalidation'
+            inputs:
+              awsCredentials: 'bancolombia-ingenieriati-qa-app-aws'
+              regionName: 'us-east-1'
+              awsCommand: cloudfront
+              awsSubCommand: 'create-invalidation'
+              awsArguments: '--distribution-id $(cloudFrontID) --paths /*'
+              failOnStandardError: false
+
+  - stage: deploy_pdn
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+    displayName: 'Deploy PDN'
+    dependsOn: [deploy_dev, deploy_qa]
+    variables:
+      cloudFrontID: E285I4PNW17T2U
+      bucketS3: nu0024001-radar-tecnologia-uo-s3-pdn
+    jobs:
+      - job: deploy
+        pool:
+          name: Release-cloud
+        steps:
+          - task: AWSCLI@1
+            displayName: 'AWS CLI: delete files s3'
+            inputs:
+              awsCredentials: 'bancolombia-ingenieriati-pdn-app-aws'
+              regionName: 'us-east-1'
+              awsCommand: 's3'
+              awsSubCommand: 'rm '
+              awsArguments: 's3://$(buckets3)/$(file_name)'
+              failOnStandardError: false
+
+          - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
+            displayName: 'S3 Upload: upload files s3'
+            inputs:
+              awsCredentials: 'bancolombia-ingenieriati-pdn-app-aws'
+              regionName: 'us-east-1'
+              bucketName: '$(buckets3)'
+              sourceFolder: '$(System.DefaultWorkingDirectory)'
+              globExpressions: '$(file_name)'
+
+          - task: AWSCLI@1
+            displayName: 'AWS CLI: cloudfront invalidation'
+            inputs:
+              awsCredentials: 'bancolombia-ingenieriati-pdn-app-aws'
+              regionName: 'us-east-1'
+              awsCommand: cloudfront
+              awsSubCommand: 'create-invalidation'
+              awsArguments: '--distribution-id $(cloudFrontID) --paths /*'
+              failOnStandardError: false
